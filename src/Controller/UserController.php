@@ -10,15 +10,63 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 #[Route('/user')]
 final class UserController extends AbstractController
 {
-    #[Route(name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository): Response
+    #[Route('/', name: 'app_user_index', methods: ['GET', 'POST'])]
+    public function index(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
+        // 1. Création d'un formulaire d'upload rapide
+        $form = $this->createFormBuilder()
+            ->add('file', FileType::class, ['label' => 'Fichier CSV (username, email, password)'])
+            ->add('import', SubmitType::class, ['label' => 'Importer', 'attr' => ['class' => 'btn btn-success mt-2']])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        // 2. Traitement du fichier si soumis
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $file */
+            $file = $form->get('file')->getData();
+
+            if ($file) {
+                $handle = fopen($file->getRealPath(), "r");
+                $header = true;
+
+                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                    if ($header) {
+                        $header = false;
+                        continue;
+                    } // On saute la ligne d'entête
+
+                    // On crée l'utilisateur ($data[0] = username, $data[1] = email, $data[2] = password)
+                    $user = new User();
+                    $user->setUserName($data[0]);
+                    $user->setEmail($data[1]);
+                    $user->setRoles(['ROLE_USER']);
+
+                    // Hashage du mot de passe
+                    $hashedPassword = $passwordHasher->hashPassword($user, $data[2]);
+                    $user->setPassword($hashedPassword);
+
+                    $entityManager->persist($user);
+                }
+                fclose($handle);
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Importation réussie !');
+                return $this->redirectToRoute('app_user_index');
+            }
+        }
+
         return $this->render('user/index.html.twig', [
-            'users' => $userRepository->findAll(),
+            'users' => $entityManager->getRepository(User::class)->findAll(),
+            'importForm' => $form->createView(),
         ]);
     }
 
@@ -71,7 +119,7 @@ final class UserController extends AbstractController
     #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
         }
