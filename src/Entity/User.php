@@ -122,4 +122,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $data;
     }
+    public function __toString(): string
+    {
+        return $this->username; // Permet d'afficher le nom dans les formulaires
+    }
 }

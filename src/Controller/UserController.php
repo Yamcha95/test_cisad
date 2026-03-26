@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use App\Entity\Infos;
 
 #[Route('/user')]
 final class UserController extends AbstractController
@@ -38,7 +39,7 @@ final class UserController extends AbstractController
                 $handle = fopen($file->getRealPath(), "r");
                 $header = true;
 
-                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
                     if ($header) {
                         $header = false;
                         continue;
@@ -79,6 +80,13 @@ final class UserController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($user);
+            $infos = new Infos();
+            $infos->setUser($user);
+            $infos->setRang('Bronze'); // Rang par défaut
+            $infos->setVictoire('0');
+            $infos->setDefaite('0');
+
+            $entityManager->persist($infos);
             $entityManager->flush();
 
             return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);

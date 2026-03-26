@@ -1,20 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Accueil - Test CISAD{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="p-5 mb-4 bg-light rounded-3 shadow-sm border">
+    <div class="container-fluid py-5 text-center">
+        <h1 class="display-5 fw-bold">Bienvenue sur le Test Technique CISAD</h1>
+        <p class="col-md-12 fs-4 mt-3">
+            Une application robuste développée avec <strong>Symfony 7</strong> et <strong>PHP 8.3</strong>.
+        </p>
+        <hr class="my-4">
+        <p>Gestion des utilisateurs, import CSV massif et statistiques de jeu en temps réel.</p>
+        
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+            <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg px-4 gap-3">Se connecter</a>
+            <a href="{{ path('app_register') }}" class="btn btn-outline-secondary btn-lg px-4">Créer un compte</a>
+        </div>
+    </div>
+</div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/Meh/test_cisad/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>/Users/Meh/test_cisad/templates/home/index.html.twig</code></li>
-    </ul>
+<div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+    <div class="feature col text-center">
+        <div class="feature-icon bg-primary bg-gradient text-white mb-2 rounded-3 p-2">🚀</div>
+        <h2>Performance</h2>
+        <p>Optimisé avec PHP 8.3 pour des réponses ultra-rapides.</p>
+    </div>
+    <div class="feature col text-center">
+        <div class="feature-icon bg-success bg-gradient text-white mb-2 rounded-3 p-2">📊</div>
+        <h2>Statistiques</h2>
+        <p>Visualisation des rangs, victoires et défaites par profil.</p>
+    </div>
+    <div class="feature col text-center">
+        <div class="feature-icon bg-warning bg-gradient text-white mb-2 rounded-3 p-2">📂</div>
+        <h2>Import CSV</h2>
+        <p>Outil d'administration pour importer des milliers d'utilisateurs.</p>
+    </div>
 </div>
 {% endblock %}

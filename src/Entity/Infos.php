@@ -20,7 +20,7 @@ class Infos
     private ?string $victoire = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $défaite = null;
+    private ?string $defaite = null;
 
     #[ORM\Column(length: 255)]
     private ?string $user = null;
@@ -54,14 +54,14 @@ class Infos
         return $this;
     }
 
-    public function getDéfaite(): ?string
+    public function getDefaite(): ?string
     {
-        return $this->défaite;
+        return $this->defaite;
     }
 
-    public function setDéfaite(string $défaite): static
+    public function setDefaite(string $defaite): static
     {
-        $this->défaite = $défaite;
+        $this->defaite = $defaite;
 
         return $this;
     }

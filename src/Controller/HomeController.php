@@ -6,13 +6,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class HomeController extends AbstractController
+class HomeController extends AbstractController
 {
-    #[Route('/home', name: 'app_home')]
+    #[Route('/', name: 'app_home')] // La route est maintenant la racine
     public function index(): Response
     {
-        return $this->render('home/index.html.twig', [
-            'controller_name' => 'HomeController',
-        ]);
+        // Petite logique sympa : si l'utilisateur est déjà connecté, 
+        // on l'envoie direct sur son profil au lieu de l'accueil
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_profile');
+        }
+
+        return $this->render('home/index.html.twig');
     }
 }
