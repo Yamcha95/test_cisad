@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Entity\Infos;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -29,6 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
+
         return $this;
     }
 
@@ -118,12 +120,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
+        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
 
         return $data;
     }
+
     public function __toString(): string
     {
         return $this->username; // Permet d'afficher le nom dans les formulaires
     }
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Infos $infos = null;
+
+    public function getInfos(): ?Infos
+    {
+        return $this->infos;
+    }
+
+    public function setInfos(?Infos $infos): static
+    {
+        // On s'assure que la relation est bidirectionnelle
+        if ($infos !== null && $infos->getUser() !== $this) {
+            $infos->setUser($this);
+        }
+
+        $this->infos = $infos;
+
+        return $this;
+    }
 }
+

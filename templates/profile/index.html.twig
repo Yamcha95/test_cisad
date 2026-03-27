@@ -3,12 +3,44 @@
 {% block title %}Mon Profil{% endblock %}
 
 {% block body %}
-    <h1>Bienvenue sur votre profil, {{ user.username }} !</h1>
-    
-    <div class="card mt-4">
-        <div class="card-body">
-            <p><strong>Email :</strong> {{ user.email }}</p>
-            {# On a enlevé la ligne qui demandait controller_name #}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white text-center py-4">
+                    <h2 class="mb-0">{{ user.username|capitalize }}</h2>
+                    <small class="text-info">{{ user.email }}</small>
+                </div>
+                <div class="card-body p-4">
+                    <h5 class="text-muted border-bottom pb-2 mb-3">Mes Statistiques</h5>
+                    
+                    {% if user.infos %}
+                        <div class="row text-center mt-4">
+                            <div class="col-4 border-end">
+                                <h6 class="text-uppercase text-muted small">Rang</h6>
+                                <p class="h4 fw-bold text-primary">{{ user.infos.rang }}</p>
+                            </div>
+                            <div class="col-4 border-end">
+                                <h6 class="text-uppercase text-muted small">Victoires</h6>
+                                <p class="h4 fw-bold text-success">{{ user.infos.victoire }}</p>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-uppercase text-muted small">Défaites</h6>
+                                <p class="h4 fw-bold text-danger">{{ user.infos.defaite }}</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning text-center mt-3">
+                            <i class="bi bi-exclamation-triangle"></i> 
+                            Aucune statistique n'a encore été attribuée à votre compte par un administrateur.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light text-center py-3">
+                    <a href="{{ path('app_home') }}" class="btn btn-outline-secondary btn-sm">Retour à l'accueil</a>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}

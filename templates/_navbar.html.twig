@@ -1,59 +1,47 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold" href="{{ path('app_home') }}">
-            <i class="bi bi-controller"></i> CISAD Games
+            <i class="bi bi-shield-check"></i> Test CISAD
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_home') }}">Accueil</a>
-                </li>
-                
+
                 {% if app.user %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('app_profile') }}">Mon Profil</a>
                     </li>
 
-                    {# Menu Admin Dropdown #}
+                    {# Menu réservé à l'ADMIN #}
                     {% if is_granted('ROLE_ADMIN') %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-info" href="#" id="adminMenu" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle text-info" href="#" role="button" data-bs-toggle="dropdown">
                                 Administration
                             </a>
-                            <ul class="dropdown-menu shadow">
-                                <li><h6 class="dropdown-header">Gestion Utilisateurs</h6></li>
-                                <li><a class="dropdown-item" href="{{ path('app_user_index') }}">Liste des Users</a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_user_new') }}">Ajouter un User</a></li>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ path('app_user_index') }}"><i class="bi bi-people"></i> Utilisateurs</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_infos_index') }}"><i class="bi bi-graph-up"></i> Statistiques Jeu</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">Gestion Jeu</h6></li>
-                                <li><a class="dropdown-item" href="{{ path('app_infos_index') }}">Liste des Stats</a></li>
-                                <li><a class="dropdown-item" href="{{ path('app_infos_new') }}">Attribuer des Stats</a></li>
+                                <li><a class="dropdown-item" href="{{ path('app_user_new') }}"><i class="bi bi-person-plus"></i> Ajouter un membre</a></li>
                             </ul>
                         </li>
                     {% endif %}
                 {% endif %}
             </ul>
 
-            <div class="d-flex align-items-center">
+            <div class="navbar-nav">
                 {% if app.user %}
-                    <div class="dropdown">
-                        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            {{ app.user.userIdentifier }} 
-                            {% if is_granted('ROLE_ADMIN') %}<span class="badge bg-danger">Admin</span>{% endif %}
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ path('app_profile') }}">Paramètres</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{{ path('app_logout') }}">Déconnexion</a></li>
-                        </ul>
-                    </div>
+                    <span class="navbar-text me-3 d-none d-lg-inline">
+                        Connecté en tant que <strong>{{ app.user.userIdentifier }}</strong>
+                    </span>
+                    <a href="{{ path('app_logout') }}" class="btn btn-outline-danger btn-sm">Déconnexion</a>
                 {% else %}
                     <a href="{{ path('app_login') }}" class="btn btn-outline-light btn-sm me-2">Connexion</a>
-                    <a href="{{ path('app_register') }}" class="btn btn-primary btn-sm">S'inscrire</a>
+                    <a href="{{ path('app_register') }}" class="btn btn-primary btn-sm">Inscription</a>
                 {% endif %}
             </div>
         </div>

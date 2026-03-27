@@ -22,8 +22,10 @@ class Infos
     #[ORM\Column(length: 255)]
     private ?string $defaite = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $user = null;
+    // --- LA RELATION ONE-TO-ONE (On garde uniquement celle-ci) ---
+    #[ORM\OneToOne(inversedBy: 'infos', cascade: ['persist'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -38,7 +40,6 @@ class Infos
     public function setRang(string $rang): static
     {
         $this->rang = $rang;
-
         return $this;
     }
 
@@ -50,7 +51,6 @@ class Infos
     public function setVictoire(string $victoire): static
     {
         $this->victoire = $victoire;
-
         return $this;
     }
 
@@ -62,19 +62,23 @@ class Infos
     public function setDefaite(string $defaite): static
     {
         $this->defaite = $defaite;
-
         return $this;
     }
 
-    public function getUser(): ?string
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setUser(string $user): static
+    public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
+    }
+
+    // Astuce pour que le formulaire de création d'Infos soit joli
+    public function __toString(): string
+    {
+        return $this->user ? $this->user->getUsername() : 'Sans utilisateur';
     }
 }

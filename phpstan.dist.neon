@@ -1,0 +1,11 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        - '#Property .*::\$id .* is never assigned int#'
+        - '#Property .*::\$id .* is never assigned#'
+        - '#Property .*::\$id \(int\|null\) is never assigned int so it can be removed from the property type#'
+    
+    reportUnmatchedIgnoredErrors: false

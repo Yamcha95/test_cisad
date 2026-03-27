@@ -23,6 +23,13 @@
                             'attr': {'class': 'form-control'}
                         }) }}
                     </div>
+                    <div class="mb-3">
+    {{ form_label(registrationForm.roles, 'Type de compte (Test Technique)', {'label_attr': {'class': 'fw-bold'}}) }}
+    <div class="p-3 border rounded bg-light">
+        {{ form_widget(registrationForm.roles) }}
+    </div>
+    <small class="text-muted">Choisissez "Administrateur" pour accéder aux fonctions d'import CSV.</small>
+</div>
                     <div class="mb-3 form-check">
                         {{ form_widget(registrationForm.agreeTerms, { 'attr': {'class': 'form-check-input'} }) }}
                         {{ form_label(registrationForm.agreeTerms, 'Accepter les conditions', { 'label_attr': {'class': 'form-check-label'} }) }}

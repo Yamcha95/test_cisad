@@ -16,24 +16,37 @@ use Symfony\Component\Routing\Attribute\Route;
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
-    {
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        Security $security,
+        EntityManagerInterface $entityManager,
+    ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // 1. Gestion du Rôle (Récupéré depuis le champ non-mappé du formulaire)
+            $selectedRole = $form->get('roles')->getData();
+            if ($selectedRole) {
+                $user->setRoles([$selectedRole]);
+            }
+
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
+            // 2. Hashage du mot de passe
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
+            // 3. Sauvegarde
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // do anything else you need here, like send an email
+            // 4. Message flash de succès (Optionnel mais recommandé pour le test)
+            $this->addFlash('success', 'Inscription réussie ! Vous êtes connecté.');
 
+            // 5. Connexion automatique et redirection
             return $security->login($user, AppAuthenticator::class, 'main');
         }
 
