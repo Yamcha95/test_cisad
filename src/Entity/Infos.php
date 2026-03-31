@@ -40,6 +40,7 @@ class Infos
     public function setRang(string $rang): static
     {
         $this->rang = $rang;
+
         return $this;
     }
 
@@ -51,6 +52,7 @@ class Infos
     public function setVictoire(string $victoire): static
     {
         $this->victoire = $victoire;
+
         return $this;
     }
 
@@ -62,6 +64,7 @@ class Infos
     public function setDefaite(string $defaite): static
     {
         $this->defaite = $defaite;
+
         return $this;
     }
 
@@ -73,6 +76,7 @@ class Infos
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
         return $this;
     }
 

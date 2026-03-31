@@ -6,11 +6,13 @@ use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-// Ne pas oublier l'import du ChoiceType !
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class UserType extends AbstractType
 {
@@ -25,10 +27,30 @@ class UserType extends AbstractType
                 'label' => 'Adresse Email',
                 'attr' => ['placeholder' => 'mario@nintendo.com'],
             ])
-            ->add('password', PasswordType::class, [
+            ->add('plainPassword', PasswordType::class, [
                 'label' => 'Mot de passe',
-                'always_empty' => false, // Utile pour l'édition
-                'help' => 'Laissez vide pour ne pas modifier (si édition)',
+                'mapped' => false, // Important : ce champ n'existe pas dans l'entité User
+                'required' => true,
+                'attr' => [
+                    'autocomplete' => 'new-password',
+                    'class' => 'form-control',
+                    'placeholder' => 'Min. 8 car. (ex: qwerty123)'
+                ],
+                'constraints' => [
+                    // On retire les [] pour utiliser l'argument nommé 'message'
+                    new NotBlank(
+                        message: 'Veuillez entrer un mot de passe'
+                    ),
+                    new Length(
+                        min: 8,
+                        minMessage: 'Le mot de passe doit faire au moins {{ limit }} caractères',
+                        max: 4096,
+                    ),
+                    new Regex(
+                        pattern: '/^(?=.*[a-z])(?=.*\d).+$/',
+                        message: 'Le mot de passe doit contenir au moins une lettre et un chiffre'
+                    ),
+                ],
             ])
             ->add('roles', ChoiceType::class, [
                 'label' => 'Droits d\'accès',
@@ -36,9 +58,9 @@ class UserType extends AbstractType
                     'Utilisateur' => 'ROLE_USER',
                     'Administrateur' => 'ROLE_ADMIN',
                 ],
-                'expanded' => true,  // Cases à cocher au lieu d'un select
-                'multiple' => true,  // Permet d'avoir plusieurs rôles
-                'label_attr' => ['class' => 'fw-bold'],
+                'expanded' => true,
+                'multiple' => true,
+                'label_attr' => ['class' => 'fw-bold text-muted small text-uppercase'],
             ])
         ;
     }

@@ -1,50 +1,129 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User index{% endblock %}
+{% block title %}Gestion des Utilisateurs{% endblock %}
 
 {% block body %}
-<h1>Liste des Utilisateurs</h1>
+<div class="container mt-5">
+    {# SECTION 1 : LA TABLE DES UTILISATEURS #}
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-people-fill me-2 text-primary"></i> Annuaire des Utilisateurs
+            </h5>
+            <div class="btn-group">
+                <a href="{{ path('app_user_new') }}" class="btn btn-primary btn-sm rounded-pill px-3">
+                    <i class="bi bi-plus-lg me-1"></i> Nouveau
+                </a>
+                
+                {# CORRECTION : Le bouton pointe vers l'ID du formulaire en bas #}
+                <a href="#import-section" class="btn btn-outline-secondary btn-sm rounded-pill px-3 ms-2">
+                    <i class="bi bi-file-earmark-arrow-up me-1"></i> Import CSV
+                </a>
+            </div>
+        </div>
 
-    <div class="card bg-light mb-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Importer des utilisateurs via CSV</h5>
-            {{ form_start(importForm) }}
-                {{ form_widget(importForm) }}
-            {{ form_end(importForm) }}
-            <small class="text-muted">Format attendu : username, email, password</small>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3 text-muted small text-uppercase">Utilisateur</th>
+                            <th class="py-3 text-muted small text-uppercase">Rôles</th>
+                            <th class="py-3 text-muted small text-uppercase">Rang</th>
+                            <th class="py-3 text-muted small text-uppercase text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-weight: bold;">
+                                            {{ user.username|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ user.username }}</div>
+                                            <div class="text-muted small">{{ user.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% for role in user.roles %}
+                                        {% if role == 'ROLE_ADMIN' %}
+                                            <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle small">Admin</span>
+                                        {% else %}
+                                            <span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle small">User</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% if user.infos %}
+                                        <span class="fw-semibold text-primary">
+                                            <i class="bi bi-trophy-fill small me-1"></i>{{ user.infos.rang }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted small italic">Aucun rang</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-outline-primary btn-sm rounded-circle shadow-sm" title="Voir le profil" style="width: 32px; height: 32px; padding: 0; line-height: 30px;">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-outline-warning btn-sm rounded-circle shadow-sm" title="Modifier" style="width: 32px; height: 32px; padding: 0; line-height: 30px;">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}" onsubmit="return confirm('Confirmer la suppression ?');" style="display:inline-block">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                            <button class="btn btn-outline-danger btn-sm rounded-circle shadow-sm" style="width: 32px; height: 32px; padding: 0; line-height: 30px;">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                    Aucun utilisateur trouvé.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <table class="table table-striped mt-4">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Email</th>
-                <th>Roles</th>
-                <th>Password</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
-                <td>{{ user.password }}</td>
-                <td>
-                    <a href="{{ path('app_user_show', {'id': user.id}) }}">show</a>
-                    <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {# SECTION 2 : LE FORMULAIRE D'IMPORTATION (AJOUTÉ) #}
+    <div class="card mt-4 border-0 shadow-sm" id="import-section" style="background-color: #f8f9fa; border: 2px dashed #dee2e6 !important;">
+        <div class="card-body p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-upload me-2 text-success"></i>Importer des joueurs via CSV</h6>
+            <p class="text-muted small mb-4">Le fichier doit respecter l'ordre : <strong>username ; email ; password ; roles ; rank ; victoire ; defaite</strong></p>
+            
+            {{ form_start(importForm) }}
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto flex-grow-1">
+                        {{ form_widget(importForm.file, {'attr': {'class': 'form-control form-control-sm'}}) }}
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-success btn-sm px-4 fw-bold">
+                            Lancer l'importation
+                        </button>
+                    </div>
+                </div>
+            {{ form_end(importForm) }}
+        </div>
+    </div>
+</div>
 
-    <a href="{{ path('app_user_new') }}">Create new</a>
+<style>
+    .bg-primary-subtle { background-color: #e7f1ff; }
+    .bg-danger-subtle { background-color: #f8d7da; }
+    .bg-info-subtle { background-color: #cff4fc; }
+    .table-hover tbody tr:hover { background-color: #fcfcfc; }
+    /* Animation douce pour le scroll vers le formulaire */
+    html { scroll-behavior: smooth; }
+</style>
 {% endblock %}

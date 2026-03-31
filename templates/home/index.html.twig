@@ -4,7 +4,7 @@
 
 {% block body %}
 <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border text-center">
-    <h1 class="display-5 fw-bold">Bienvenue sur CISAD Games</h1>
+    <h1 class="display-5 fw-bold">Bienvenue sur le test CISAD</h1>
     
     {% if app.user %}
         <p class="fs-4">Content de vous revoir, <strong>{{ app.user.username }}</strong> !</p>
@@ -15,7 +15,6 @@
             {% endif %}
         </div>
     {% else %}
-        <p class="fs-4">La plateforme de gestion de statistiques de jeu.</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
             <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg px-4">Se connecter</a>
             <a href="{{ path('app_register') }}" class="btn btn-outline-secondary btn-lg px-4">Créer un compte</a>

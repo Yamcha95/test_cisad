@@ -1,41 +1,107 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Infos index{% endblock %}
+{% block title %}Gestion des Statistiques{% endblock %}
 
 {% block body %}
-    <h1>Infos index</h1>
+<div class="container mt-5">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-graph-up-arrow me-2 text-success"></i> Statistiques des Joueurs
+            </h5>
+            <a href="{{ path('app_infos_new') }}" class="btn btn-success btn-sm rounded-pill px-3">
+                <i class="bi bi-plus-circle me-1"></i> Ajouter une Stat
+            </a>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Rang</th>
-                <th>Victoire</th>
-                <th>Défaite</th>
-                <th>User</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for info in infos %}
-            <tr>
-                <td>{{ info.id }}</td>
-                <td>{{ info.rang }}</td>
-                <td>{{ info.victoire }}</td>
-                <td>{{ info.defaite }}</td>
-                <td>{{ info.user }}</td>
-                <td>
-                    <a href="{{ path('app_infos_show', {'id': info.id}) }}">show</a>
-                    <a href="{{ path('app_infos_edit', {'id': info.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3 text-muted small text-uppercase">Joueur</th>
+                            <th class="py-3 text-muted small text-uppercase text-center">Rang</th>
+                            <th class="py-3 text-muted small text-uppercase text-center">Victoires</th>
+                            <th class="py-3 text-muted small text-uppercase text-center">Défaites</th>
+                            <th class="py-3 text-muted small text-uppercase text-center">Ratio</th>
+                            <th class="py-3 text-muted small text-uppercase text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for info in infos %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">
+                                        {{ info.user ? info.user.username : 'Utilisateur inconnu' }}
+                                    </div>
+                                    <div class="text-muted small">ID Stat: #{{ info.id }}</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                                        <i class="bi bi-shield-shaded me-1"></i> {{ info.rang }}
+                                    </span>
+                                </td>
+                                <td class="text-center text-success fw-bold">
+                                    <i class="bi bi-caret-up-fill small"></i> {{ info.victoire }}
+                                </td>
+                                <td class="text-center text-danger fw-bold">
+                                    <i class="bi bi-caret-down-fill small"></i> {{ info.defaite }}
+                                </td>
+                                <td class="text-center">
+                                    {% set total = info.victoire + info.defaite %}
+                                    {% if total > 0 %}
+                                        <div class="progress" style="height: 6px; width: 80px; margin: 0 auto;">
+                                            {% set percent = (info.victoire / total * 100)|round %}
+                                            <div class="progress-bar bg-success" style="width: {{ percent }}%"></div>
+                                        </div>
+                                        <small class="text-muted" style="font-size: 0.7rem;">{{ percent }}% winrate</small>
+                                    {% else %}
+                                        <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        {# Icône VOIR #}
+                                        <a href="{{ path('app_infos_show', {'id': info.id}) }}" 
+                                           class="btn btn-outline-secondary btn-sm rounded-circle shadow-sm" 
+                                           title="Détails" style="width: 32px; height: 32px; padding: 0; line-height: 30px;">
+                                            <i class="bi bi-search"></i>
+                                        </a>
+                                        {# Icône MODIFIER #}
+                                        <a href="{{ path('app_infos_edit', {'id': info.id}) }}" 
+                                           class="btn btn-outline-warning btn-sm rounded-circle shadow-sm" 
+                                           title="Éditer" style="width: 32px; height: 32px; padding: 0; line-height: 30px;">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        {# Icône SUPPRIMER #}
+                                        <form method="post" action="{{ path('app_infos_delete', {'id': info.id}) }}" onsubmit="return confirm('Supprimer ces stats ?');" style="display:inline-block">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ info.id) }}">
+                                            <button class="btn btn-outline-danger btn-sm rounded-circle shadow-sm" 
+                                                    style="width: 32px; height: 32px; padding: 0; line-height: 30px;">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-bar-chart display-4 d-block mb-3"></i>
+                                    Aucune donnée statistique disponible.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <a href="{{ path('app_infos_new') }}">Create new</a>
+<style>
+    .bg-primary-subtle { background-color: #e7f1ff; }
+    .progress { background-color: #f1f1f1; overflow: visible; }
+    .table-hover tbody tr:hover { background-color: #fcfcfc; }
+</style>
 {% endblock %}

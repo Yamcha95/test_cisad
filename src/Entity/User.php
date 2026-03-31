@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-use App\Entity\Infos;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -140,7 +139,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setInfos(?Infos $infos): static
     {
         // On s'assure que la relation est bidirectionnelle
-        if ($infos !== null && $infos->getUser() !== $this) {
+        if (null !== $infos && $infos->getUser() !== $this) {
             $infos->setUser($this);
         }
 
@@ -149,4 +148,3 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 }
-

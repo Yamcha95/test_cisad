@@ -21,15 +21,13 @@ final class UserController extends AbstractController
     #[Route('/', name: 'app_user_index', methods: ['GET', 'POST'])]
     public function index(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-        // 1. Création d'un formulaire d'upload rapide
         $form = $this->createFormBuilder()
-            ->add('file', FileType::class, ['label' => 'Fichier CSV (username, email, password)'])
+            ->add('file', FileType::class, ['label' => 'Fichier CSV'])
             ->add('import', SubmitType::class, ['label' => 'Importer', 'attr' => ['class' => 'btn btn-success mt-2']])
             ->getForm();
 
         $form->handleRequest($request);
 
-        // 2. Traitement du fichier si soumis
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var UploadedFile $file */
             $file = $form->get('file')->getData();
@@ -42,24 +40,37 @@ final class UserController extends AbstractController
                     if ($header) {
                         $header = false;
                         continue;
-                    } // On saute la ligne d'entête
+                    }
 
-                    // On crée l'utilisateur ($data[0] = username, $data[1] = email, $data[2] = password)
+                    // 1. Création de l'User
                     $user = new User();
-                    $user->setUserName($data[0]);
-                    $user->setEmail($data[1]);
-                    $user->setRoles(['ROLE_USER']);
+                    $user->setUsername($data[0]); // username
+                    $user->setEmail($data[1]);    // email
 
-                    // Hashage du mot de passe
-                    $hashedPassword = $passwordHasher->hashPassword($user, $data[2]);
+                    // On gère le rôle depuis le CSV (data[3]), sinon ROLE_USER par défaut
+                    $role = !empty($data[3]) ? $data[3] : 'ROLE_USER';
+                    $user->setRoles([$role]);
+
+                    $hashedPassword = $passwordHasher->hashPassword($user, $data[2]); // password
                     $user->setPassword($hashedPassword);
 
                     $entityManager->persist($user);
+
+                    // 2. CRÉATION DES INFOS (C'est ce qui manquait !)
+                    $infos = new Infos();
+                    $infos->setRang(!empty($data[4]) ? $data[4] : 'Bronze'); // rank
+                    $infos->setVictoire(!empty($data[5]) ? $data[5] : '0');   // victoire
+                    $infos->setDefaite(!empty($data[6]) ? $data[6] : '0');    // defaite
+
+                    // On lie l'objet Infos à l'User
+                    $infos->setUser($user);
+
+                    $entityManager->persist($infos);
                 }
                 fclose($handle);
                 $entityManager->flush();
 
-                $this->addFlash('success', 'Importation réussie !');
+                $this->addFlash('success', 'Importation réussie avec les rangs et statistiques !');
 
                 return $this->redirectToRoute('app_user_index');
             }
@@ -72,17 +83,29 @@ final class UserController extends AbstractController
     }
 
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            // 1. RÉCUPÉRER LE MOT DE PASSE DU CHAMP NON-MAPPÉ
+            $plainPassword = $form->get('plainPassword')->getData();
+
+            // 2. HASHER ET ENREGISTRER DANS L'ENTITÉ
+            if ($plainPassword) {
+                $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+                $user->setPassword($hashedPassword);
+            }
+
             $entityManager->persist($user);
+
+            // Création auto des infos par défaut
             $infos = new Infos();
             $infos->setUser($user);
-            $infos->setRang('Bronze'); // Rang par défaut
+            $infos->setRang('Fer');
             $infos->setVictoire('0');
             $infos->setDefaite('0');
 
@@ -127,7 +150,7 @@ final class UserController extends AbstractController
     #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
         }

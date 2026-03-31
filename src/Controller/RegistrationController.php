@@ -27,26 +27,30 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // 1. Gestion du Rôle (Récupéré depuis le champ non-mappé du formulaire)
-            $selectedRole = $form->get('roles')->getData();
-            if ($selectedRole) {
-                $user->setRoles([$selectedRole]);
-            }
-
-            /** @var string $plainPassword */
+            // Récupérer le mot de passe en clair du formulaire
             $plainPassword = $form->get('plainPassword')->getData();
+            
+            // Récupérer le rôle choisi
+            $role = $form->get('roles')->getData();
+            $user->setRoles([$role]);
 
-            // 2. Hashage du mot de passe
+            // 1. Hasher le mot de passe
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            // 3. Sauvegarde
+            // 2. CRÉER LES INFOS PAR DÉFAUT (RANG FER)
+            $infos = new \App\Entity\Infos(); // N'oublie pas l'import en haut ou le chemin complet
+            $infos->setUser($user);
+            $infos->setRang('Fer'); // Ton nouveau standard systématique
+            $infos->setVictoire(0);
+            $infos->setDefaite(0);
+
+            // 3. Sauvegarde tout
             $entityManager->persist($user);
+            $entityManager->persist($infos); // On persiste aussi les infos !
             $entityManager->flush();
 
-            // 4. Message flash de succès (Optionnel mais recommandé pour le test)
-            $this->addFlash('success', 'Inscription réussie ! Vous êtes connecté.');
+            $this->addFlash('success', 'Bienvenue ! Votre compte est prêt au rang Fer.');
 
-            // 5. Connexion automatique et redirection
             return $security->login($user, AppAuthenticator::class, 'main');
         }
 
