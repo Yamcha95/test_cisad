@@ -6,7 +6,7 @@ Ce projet est une application de gestion de base de données de joueurs réalis�
 
 1. **Clonage & Dépendances** :
    ```bash
-   git clone <url-de-votre-depot>
+   git clone https://github.com/Yamcha95/test_cisad.git
    cd <nom-du-dossier>
    composer install
 Configuration :
