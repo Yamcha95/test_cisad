@@ -1,38 +1,83 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Infos{% endblock %}
+{% block title %}Profil de {{ info.user.username }}{% endblock %}
 
 {% block body %}
-    <h1>Infos</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            {# En-tête avec bouton retour #}
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Détails des Statistiques</h1>
+                <a href="{{ path('app_infos_index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ info.id }}</td>
-            </tr>
-            <tr>
-                <th>Rang</th>
-                <td>{{ info.rang }}</td>
-            </tr>
-            <tr>
-                <th>Victoire</th>
-                <td>{{ info.victoire }}</td>
-            </tr>
-            <tr>
-                <th>Defaite</th>
-                <td>{{ info.defaite }}</td>
-            </tr>
-            <tr>
-                <th>User</th>
-                <td>{{ info.user }}</td>
-            </tr>
-        </tbody>
-    </table>
+            <div class="card shadow border-0 overflow-hidden">
+                {# Bannière colorée selon le rang #}
+                {% set bannerColor = {
+                    'Fer': 'bg-secondary',
+                    'Bronze': 'bg-danger',
+                    'Argent': 'bg-info',
+                    'Or': 'bg-warning',
+                    'Platine': 'bg-primary',
+                    'Diamant': 'bg-dark'
+                } %}
+                <div class="py-4 {{ bannerColor[info.rang] ?? 'bg-light' }} text-center text-white">
+                    <div class="display-6 fw-bold text-uppercase">{{ info.rang }}</div>
+                    <p class="mb-0 opacity-75">Rang actuel de {{ info.user.username }}</p>
+                </div>
 
-    <a href="{{ path('app_infos_index') }}">back to list</a>
+                <div class="card-body p-4">
+                    <div class="row text-center g-4 mb-4">
+                        <div class="col-6">
+                            <div class="p-3 border rounded bg-light">
+                                <h2 class="text-success fw-bold mb-0">{{ info.victoire }}</h2>
+                                <small class="text-muted text-uppercase fw-bold">Victoires</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 border rounded bg-light">
+                                <h2 class="text-danger fw-bold mb-0">{{ info.defaite }}</h2>
+                                <small class="text-muted text-uppercase fw-bold">Défaites</small>
+                            </div>
+                        </div>
+                    </div>
 
-    <a href="{{ path('app_infos_edit', {'id': info.id}) }}">edit</a>
+                    <table class="table table-borderless border-top pt-3">
+                        <tbody>
+                            <tr>
+                                <th class="text-muted w-25">ID Technique</th>
+                                <td class="fw-mono">#{{ info.id }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Joueur</th>
+                                <td><strong>{{ info.user.username }}</strong> <small>({{ info.user.email }})</small></td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Ratio de victoire</th>
+                                <td>
+                                    {% set total = info.victoire + info.defaite %}
+                                    {% if total > 0 %}
+                                        {{ ((info.victoire / total) * 100)|round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-    {{ include('infos/_delete_form.html.twig') }}
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ path('app_infos_edit', {'id': info.id}) }}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        {{ include('infos/_delete_form.html.twig') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

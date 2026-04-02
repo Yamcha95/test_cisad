@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 #[Route('/user')]
 final class UserController extends AbstractController
@@ -23,7 +24,6 @@ final class UserController extends AbstractController
     {
         $form = $this->createFormBuilder()
             ->add('file', FileType::class, ['label' => 'Fichier CSV'])
-            ->add('import', SubmitType::class, ['label' => 'Importer', 'attr' => ['class' => 'btn btn-success mt-2']])
             ->getForm();
 
         $form->handleRequest($request);
@@ -33,46 +33,63 @@ final class UserController extends AbstractController
             $file = $form->get('file')->getData();
 
             if ($file) {
-                $handle = fopen($file->getRealPath(), 'r');
-                $header = true;
+                try {
+                    $handle = fopen($file->getRealPath(), 'r');
+                    $header = true;
 
-                while (($data = fgetcsv($handle, 1000, ';')) !== false) {
-                    if ($header) {
-                        $header = false;
-                        continue;
+                    while (($data = fgetcsv($handle, 1000, ';')) !== false) {
+                        if ($header) {
+                            $header = false;
+                            continue;
+                        }
+
+                        // 1. Création de l'User
+                        $user = new User();
+                        $user->setUsername($data[0]); // username
+                        $user->setEmail($data[1]);    // email
+
+                        // On gère le rôle depuis le CSV (data[3]), sinon ROLE_USER par défaut
+                        $role = !empty($data[3]) ? $data[3] : 'ROLE_USER';
+                        $user->setRoles([$role]);
+
+                        $hashedPassword = $passwordHasher->hashPassword($user, $data[2]); // password
+                        $user->setPassword($hashedPassword);
+
+                        $entityManager->persist($user);
+
+                        // 2. CRÉATION DES INFOS (C'est ce qui manquait !)
+                        $infos = new Infos();
+                        $infos->setRang(!empty($data[4]) ? $data[4] : 'Bronze'); // rank
+                        $infos->setVictoire(!empty($data[5]) ? $data[5] : '0');   // victoire
+                        $infos->setDefaite(!empty($data[6]) ? $data[6] : '0');    // defaite
+
+                        // On lie l'objet Infos à l'User
+                        $infos->setUser($user);
+
+                        $entityManager->persist($infos);
                     }
+                    fclose($handle);
+                    $entityManager->flush();
 
-                    // 1. Création de l'User
-                    $user = new User();
-                    $user->setUsername($data[0]); // username
-                    $user->setEmail($data[1]);    // email
+                    $this->addFlash('success', 'Importation réussie avec les rangs et statistiques !');
 
-                    // On gère le rôle depuis le CSV (data[3]), sinon ROLE_USER par défaut
-                    $role = !empty($data[3]) ? $data[3] : 'ROLE_USER';
-                    $user->setRoles([$role]);
+                    return $this->redirectToRoute('app_user_index');
+                } catch (UniqueConstraintViolationException $e) {
+                    // On attrape l'erreur de doublon (Email déjà existant)
+                    $this->addFlash('danger', "Erreur : Un ou plusieurs utilisateurs (emails) existent déjà dans la base.");
+                    
+                    // Optionnel : On peut vider l'EntityManager pour éviter de tenter de ré-enregistrer 
+                    // des objets corrompus lors de la prochaine requête.
+                    $entityManager->clear(); 
 
-                    $hashedPassword = $passwordHasher->hashPassword($user, $data[2]); // password
-                    $user->setPassword($hashedPassword);
-
-                    $entityManager->persist($user);
-
-                    // 2. CRÉATION DES INFOS (C'est ce qui manquait !)
-                    $infos = new Infos();
-                    $infos->setRang(!empty($data[4]) ? $data[4] : 'Bronze'); // rank
-                    $infos->setVictoire(!empty($data[5]) ? $data[5] : '0');   // victoire
-                    $infos->setDefaite(!empty($data[6]) ? $data[6] : '0');    // defaite
-
-                    // On lie l'objet Infos à l'User
-                    $infos->setUser($user);
-
-                    $entityManager->persist($infos);
+                } catch (\Exception $e) {
+                    // On attrape toutes les autres erreurs imprévues
+                    $this->addFlash('danger', "Une erreur inattendue est survenue lors de l'importation.");
+                } finally {
+                    if (is_resource($handle)) {
+                        fclose($handle);
+                    }
                 }
-                fclose($handle);
-                $entityManager->flush();
-
-                $this->addFlash('success', 'Importation réussie avec les rangs et statistiques !');
-
-                return $this->redirectToRoute('app_user_index');
             }
         }
 
@@ -105,7 +122,7 @@ final class UserController extends AbstractController
             // Création auto des infos par défaut
             $infos = new Infos();
             $infos->setUser($user);
-            $infos->setRang('Fer');
+            $infos->setRang('Iron');
             $infos->setVictoire('0');
             $infos->setDefaite('0');
 

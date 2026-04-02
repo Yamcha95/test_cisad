@@ -1,11 +1,43 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Infos{% endblock %}
+{% block title %}Nouveau Rang de Joueur{% endblock %}
 
 {% block body %}
-    <h1>Create new Infos</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            {# Fil d'ariane #}
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('app_infos_index') }}">Statistiques</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Nouvelle fiche</li>
+                </ol>
+            </nav>
 
-    {{ include('infos/_form.html.twig') }}
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white py-3">
+                    <h1 class="h4 mb-0 fw-bold">
+                        <i class="bi bi-plus-circle me-2"></i>Attribuer des statistiques à un joueur
+                    </h1>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-4">
+                        <i class="bi bi-info-circle me-1"></i> Utilisez ce formulaire pour créer manuellement le rang d'un joueur qui n'en possède pas encore.
+                    </p>
 
-    <a href="{{ path('app_infos_index') }}">back to list</a>
+                    {# On inclut le formulaire partagé #}
+                    {{ include('infos/_form.html.twig', {'button_label': 'Créer la fiche statistique'}) }}
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <a href="{{ path('app_infos_index') }}" class="btn btn-link text-secondary">
+                            <i class="bi bi-arrow-left"></i> Annuler et retourner à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

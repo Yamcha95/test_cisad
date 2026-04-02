@@ -40,7 +40,7 @@ class RegistrationController extends AbstractController
             // 2. CRÉER LES INFOS PAR DÉFAUT (RANG FER)
             $infos = new \App\Entity\Infos(); // N'oublie pas l'import en haut ou le chemin complet
             $infos->setUser($user);
-            $infos->setRang('Fer'); // Ton nouveau standard systématique
+            $infos->setRang('Iron'); // Ton nouveau standard systématique
             $infos->setVictoire(0);
             $infos->setDefaite(0);
 
