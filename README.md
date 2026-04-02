@@ -14,13 +14,13 @@ Adaptez votre DATABASE_URL dans le fichier .env ou .env.local.
 
 Base de données :
 
-Bash
-php bin/console doctrine:database:create
-php bin/console doctrine:migrations:migrate
-Serveur :
+    ```bash
+    php bin/console doctrine:database:create
+    php bin/console doctrine:migrations:migrate
+    Serveur :
 
-Bash
-symfony serve
+    ```bash
+    symfony serve
 
 
 🛠️ Choix Techniques & Justifications
