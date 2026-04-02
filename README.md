@@ -12,13 +12,12 @@ Ce projet est une application de gestion de base de données de joueurs réalis�
 Configuration :
 Adaptez votre DATABASE_URL dans le fichier .env ou .env.local.
 
-Base de données :
-
+2. **Base de données** :
     ```bash
     php bin/console doctrine:database:create
     php bin/console doctrine:migrations:migrate
-    Serveur :
-
+    
+3. **Serveur**:
     ```bash
     symfony serve
 
